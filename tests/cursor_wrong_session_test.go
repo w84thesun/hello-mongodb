@@ -13,6 +13,15 @@ import (
 func TestRunCursorAfterSessionClosed(t *testing.T) {
 	ctx, client := connectToMongo(t)
 
+	for i := 0; i < 200; i++ {
+		_, err := client.Database("test").Collection("foo").InsertOne(ctx, bson.D{{"v", int32(i)}})
+		require.NoError(t, err)
+	}
+
+	defer func() {
+		client.Database("test").Collection("foo").Drop(ctx)
+	}()
+
 	// Get cursor.
 	result := client.Database("test").RunCommand(ctx, bson.D{{"find", "foo"}})
 	require.NoError(t, result.Err())
