@@ -11,8 +11,8 @@ mkdir -p certs
 cd certs
 
 ### CA
-openssl genrsa -out rootCA.key 2048
-openssl req -x509 -new -nodes -key rootCA.key -days 1024 -out rootCA.pem -subj "/CN=mongodb-root-ca"
+faketime 'last week' openssl genrsa -out rootCA.key 2048
+faketime 'last week' openssl req -x509 -new -nodes -key rootCA.key -days 1024 -out rootCA.pem -subj "/CN=mongodb-root-ca"
 
 ### SERVER 
 openssl genrsa -out mongodb.key 2048
@@ -25,6 +25,12 @@ openssl genrsa -out client.key 2048
 openssl req -new -key client.key -out client.csr -subj "/CN=localhost"
 openssl x509 -req -in client.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out client.crt -days 365
 cat client.crt client.key > client.pem
+
+### CLIENT EXPIRED
+openssl genrsa -out client-expired.key 2048
+openssl req -new -key client-expired.key -out client-expired.csr -subj "/CN=localhost"
+faketime '6 days ago' openssl x509 -req -in client-expired.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out client-expired.crt -days 1
+cat client-expired.crt client-expired.key > client-expired.pem
 
 ```
 
